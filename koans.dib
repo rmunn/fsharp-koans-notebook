@@ -1,0 +1,134 @@
+#!markdown
+
+# F# Koans
+
+This is a VS Code notebook that will teach you how to use F#.
+
+## First steps
+
+To begin, please click the "Execute Cell" button (a right-pointing triangle) in the code section immediately below. This will set up the necessary functions for running the rest of the tutorial. Once you've done that, you can hide this section as you'll no longer need it. Do that by clicking on the down-facing arrow to the left.
+
+#!fsharp
+
+open System
+[<AttributeUsage(AttributeTargets.Class ||| AttributeTargets.Method, AllowMultiple = false)>]
+type KoanAttribute () =
+    inherit Attribute()
+    let mutable sortOrder = 0
+    member x.Sort
+        with get() = sortOrder
+        and set(v) = sortOrder <- v
+
+let inline __<'T> : 'T = failwith "Seek wisdom by filling in the __"
+
+type FILL_ME_IN =
+    class end
+
+type FILL_IN_THE_EXCEPTION() =
+    inherit Exception()
+
+let green text =
+    let fgColor = Console.ForegroundColor
+    Console.ForegroundColor <- ConsoleColor.Green
+    printfn text
+    Console.ForegroundColor <- fgColor
+
+let assertEqual a b =
+    if a = b then "✔ Solved!" else failwithf "Expected %A but got %A" a b
+
+let assertNotEqual a b =
+    if a = b then failwithf "Expected a value not equal to %A got %A" a b else "✔ Solved!"
+
+let AssertWithMessage (x : bool) message =
+    if x then () else failwith message
+
+let inline AssertEquality (x:'T) (y:'T) =
+    match box y with
+    | :? System.Type as t when t = typeof<FILL_ME_IN> -> failwith "Seek wisdom by correcting the type FILL_ME_IN"
+    | :? System.Type as t when t = typeof<FILL_IN_THE_EXCEPTION> -> failwith "Seek wisdom by correcting the type FILL_IN_THE_EXCEPTION"
+    | _ -> assertEqual x y
+
+let AssertInequality (x:'T) (y:'T) = assertNotEqual x y
+
+let AssertThrows<'a when 'a :> exn> action =
+    try
+        action()
+    with
+    | :? 'a -> "✔ Solved!"
+    | e ->
+        let tActual : Type = e.GetType()
+        let tExpected = typeof<'a>
+        failwithf "Expected an exception of type %s but got an exception of type %s instead: %s" tExpected.Name tActual.Name (e.ToString())
+
+let Assert (x : bool) = AssertWithMessage x "Expected a true value but got false"
+
+#!markdown
+
+# Exercises
+
+This is where the fun begins! Each koan contains an example designed to teach you a lesson about the F# language. If you execute the cell below, you will get a message that the AssertEquality koan below has failed. Your job is to fill in the blank (the \_\_ symbol) to make it pass. Once you make the change, re-run the cell to make sure the koan passes, and continue on to the next koan. With each passing koan, you'll learn more about F#, and add another weapon to your F# programming arsenal.
+
+**NOTE**: If you see an exception about "The value of constructor '\_\_' is not defined" and/or "The value or constructor 'AssertEquality' is not defined.", then you have not yet run the helper code in the first cell of this notebook. Please go back and execute the first cell in this notebook, then the koans below should work properly.
+
+#!markdown
+
+## Exercise 1: Check that things are set up right
+
+#!fsharp
+
+let expected_value = 1 + 1
+let actual_value = 2 //start by changing this line
+
+AssertEquality expected_value actual_value
+ 
+
+#!fsharp
+
+AssertEquality (1 + 1) 2
+
+#!markdown
+
+## Exercise 2: About `let`
+
+The `let` keyword is one of the most fundamental parts of F#. You'll use it in almost every line of F# code you write, so let's get to know it well! (no pun intended)
+
+#!markdown
+
+`let` binds a name to a value
+
+#!fsharp
+
+let x = 50
+
+AssertEquality x 50
+
+#!markdown
+
+`let` infers the types of values where possible.
+
+#!fsharp
+
+let x = 50
+let typeOfX = x.GetType()
+AssertEquality typeOfX typeof<int>
+
+let y = "a string"
+let expectedType = y.GetType()
+AssertEquality expectedType typeof<string>
+
+#!markdown
+
+You can make types explicit.  You don't usually need to provide explicit type annotations types for 
+           local variables, but type annotations can come in handy in other 
+           contexts as you'll see later
+
+#!fsharp
+
+let (x:int) = 42
+let typeOfX = x.GetType()
+
+let y:string = "forty two"
+let typeOfY = y.GetType()
+
+AssertEquality typeOfX typeof<int>
+AssertEquality typeOfY typeof<string>
