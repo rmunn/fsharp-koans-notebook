@@ -6,7 +6,7 @@ This is a VS Code notebook that will teach you how to use F#.
 
 ## First steps
 
-To begin, please click the "Execute Cell" button (a right-pointing triangle) in the code section immediately below. This will set up the necessary functions for running the rest of the tutorial. Once you've done that, you can hide this section as you'll no longer need it. Do that by clicking on the down-facing arrow to the left.
+To begin, please click the "Execute Cell" button (a right-pointing triangle) in the code section immediately below. This will set up the necessary functions for running the rest of the tutorial. Once you've done that, you can hide this section as you'll no longer need it. Do that by clicking on the down-facing arrow to the left of the "F# Koans" title.
 
 #!fsharp
 
@@ -100,7 +100,7 @@ The `let` keyword is one of the most fundamental parts of F#. You'll use it in a
 
 let x = 50
 
-AssertEquality x 50
+AssertEquality x __
 
 #!markdown
 
@@ -114,13 +114,11 @@ AssertEquality typeOfX typeof<int>
 
 let y = "a string"
 let expectedType = y.GetType()
-AssertEquality expectedType typeof<string>
+AssertEquality expectedType typeof<FILL_ME_IN>
 
 #!markdown
 
-You can make types explicit.  You don't usually need to provide explicit type annotations types for 
-           local variables, but type annotations can come in handy in other 
-           contexts as you'll see later
+You can make types explicit.  You don't usually need to provide explicit type annotations types for local variables, but type annotations can come in handy in other contexts as you'll see later.
 
 #!fsharp
 
@@ -130,5 +128,303 @@ let typeOfX = x.GetType()
 let y:string = "forty two"
 let typeOfY = y.GetType()
 
+AssertEquality typeOfX typeof<FILL_ME_IN>
+AssertEquality typeOfY typeof<FILL_ME_IN>
+
+#!markdown
+
+Depending on your background, you may be surprised to learn that in F#, integers and floating point numbers are different types. In other words, the following is true.
+
+#!fsharp
+
+let x = 20
+let typeOfX = x.GetType()
+
+let y = 20.0
+let typeOfY = y.GetType()
+
+// You don't need to modify these
 AssertEquality typeOfX typeof<int>
-AssertEquality typeOfY typeof<string>
+AssertEquality typeOfY typeof<float>
+
+// If you're coming from another .NET language, float is F# slang for the double type.
+
+#!markdown
+
+If you want to modify the value of a variable, use the `mutable` keyword. If you don't use the `mutable` keyword, values cannot be modified.
+
+#!fsharp
+
+let mutable x = 100
+x <- 200
+
+AssertEquality x __
+
+let y = 50
+
+//What happens if you uncomment the following?
+//
+//y <- 100
+
+AssertEquality y __
+
+#!markdown
+
+## Exercise 3: About functions
+
+Now that you've seen how to bind a name to a value with `let`, you'll learn to use the `let` keyword to create functions.
+
+#!markdown
+
+By default, F# is whitespace sensitive. For functions, this means that the last line of a function is its return value, and the body of a function is denoted by indentation.
+
+#!fsharp
+
+let add x y =
+    x + y
+
+#!markdown
+
+You call functions by writing their name and their parameter list separated by spaces. No parentheses or commas necessary, except in special cases we'll learn about later.
+
+#!fsharp
+
+let result1 = add 2 2
+let result2 = add 5 2
+
+AssertEquality result1 __
+AssertEquality result2 __
+
+#!markdown
+
+Function definitions can be nested. The inner function is visible only inside the function that defines it. This allows for encapsulation.
+
+#!fsharp
+
+let quadrupleOf x =
+    let doubleOf x =
+        x * 2
+
+    doubleOf(doubleOf(x))
+
+let result = quadrupleOf 4
+AssertEquality result __
+
+// What happens if you uncomment this?
+// let result2 = doubleOf 2
+// result2
+
+#!markdown
+
+Sometimes you need to help F#'s type inference system out with an explicit type annotation. This happens most often when you're calling an instance method on a function parameter. For example, in the function below F# can infer that your parameter is a class with a `Replace` method, but without a type annotation F# can't tell whether `text` is a string or a `Regex` instance, or maybe even some other class that has a `Replace` method (say, a `List`). Try removing the type annotation and see what happens.
+
+#!fsharp
+
+let sayItLikeAnAuctioneer (text:string) =
+    text.Replace(" ", "")
+
+let auctioneered = sayItLikeAnAuctioneer "going once going twice sold to the lady in red"
+AssertEquality auctioneered __
+
+#!markdown
+
+Inside a function, variables in the parent scope are accessible. This is known as a [closure](http://en.wikipedia.org/wiki/Closure_(computer_science)).
+
+#!fsharp
+
+let suffix = "!!!"
+
+let caffeinate (text:string) =
+    let exclaimed = text.Trim() + suffix
+    let yelled = exclaimed.ToUpper()
+    yelled
+
+let caffeinatedReply = caffeinate "hello there"
+
+AssertEquality caffeinatedReply __
+
+#!markdown
+
+## Exercise 4: About the order of evaluation
+
+Sometimes you'll need to be explicit about the order in which functions are evaluated. F# offers a couple mechanisms for doing this.
+
+#!markdown
+
+Sometimes you need parentheses to group things, such as function calls inside a different function's parameter list.
+
+#!fsharp
+
+let add x y =
+    x + y
+
+let result = add (add 5 8) (add 1 1)
+
+AssertEquality result __
+
+// What happens if you remove the parentheses? Try it and see.
+
+#!markdown
+
+The "backward pipe" operator `<|` can also help with grouping, as it can remove the need for a pair of parentheses. Think of it as "take the expression on the right, and feed it into the function on the left".
+
+#!fsharp
+
+let add x y =
+    x + y
+
+let double x =
+    x * 2
+
+let result = double <| add 5 8
+
+AssertEquality result __
+
+// Equivalent:
+let result2 = double (add 5 8)
+AssertEquality result result2
+
+#!markdown
+
+There's also a "forward pipe" operator `|>` which takes the expression on the left and feeds it into the function on the right. We'll learn more about it in exercise __ ((FILL THIS IN)).
+
+#!fsharp
+
+let add x y =
+    x + y
+
+let double x =
+    x * 2
+
+let result = add 5 8 |> double
+
+AssertEquality result 26
+
+// Equivalent:
+let result2 = double (add 5 8)
+AssertEquality result result2
+
+#!markdown
+
+## Exercise 5: About the `unit` type
+
+The `unit` type is a special type that represents the lack of a value. It's similar to void in other languages, but unit is actually considered to be a type in F#. It is a type with one (and only one) possible value, written as `()`.
+
+#!markdown
+
+The `unit` type is used when there is no return value for a function.
+
+#!fsharp
+
+let sendData data =
+    // ...sending the data to the server...
+    ()
+
+let x = sendData "data"
+AssertEquality x __ // Don't overthink this. Note also the value "()" displays as "null" in some cases.
+
+#!markdown
+
+Parameterless functions in F# are considered to take one parameter, of type `unit`.
+
+#!fsharp
+
+let sayHello() =
+    "hello"
+
+let result = sayHello()
+AssertEquality result __
+
+#!markdown
+
+## Exercise 6: About tuples
+
+Tuples are used to easily group together values in F#. They're another fundamental construct of the language.
+
+#!markdown
+
+Tuples are defined by listing a number of items, separated by commas. Parentheses around the tuple are optional, but recommended in most situations.
+
+#!fsharp
+
+let items = "apple", "dog"  // Parentheses around the tuple are optional here
+
+AssertEquality items ("apple", __)  // But here you'll get a syntax error if you omit the parentheses. Try it and see what happens.
+
+#!markdown
+
+There are several ways to access items inside a tuple. For 2-item tuples, F# has a pair of functions `fst` and `snd` that you can use. They do not work on tuples of arity 3 or more, though.
+
+#!fsharp
+
+let items = ("apple", "dog")
+
+let fruit = fst items
+let animal = snd items
+
+AssertEquality fruit "apple"
+AssertEquality animal "dog"
+
+// Try uncommenting this and see what happens
+// let items3 = ("apple", "dog", "Mustang")
+// fst items3
+
+#!markdown
+
+For tuples of arity greater than 2, it's usually better to use a technique called pattern matching to access the values of a tuple.
+
+Pattern matching works with tuples of any arity, and it allows you to simultaneously break apart the tuple while assigning a name to each value. Here's an example.
+
+#!fsharp
+
+let items = ("apple", "dog", "Mustang")
+
+let fruit, animal, car = items
+
+AssertEquality fruit __
+AssertEquality animal __
+AssertEquality car __
+
+#!markdown
+
+When pattern matching, you can use the special name `_` (a single underscore) to match any parts of the tuple you don't care about. Multiple `_` can be used in the same pattern-matching expression.
+
+Pattern matching is used in many other parts of F#, and we'll revisit it again later.
+
+#!fsharp
+
+let items = ("apple", "dog", "Mustang")
+
+let _, animal, _ = items
+
+AssertEquality animal __
+
+#!markdown
+
+Tuples are also useful for returning multiple values from a function.
+
+#!fsharp
+
+let squareAndCube x =
+    (x ** 2.0, x ** 3.0)
+
+let squared, cubed = squareAndCube 3.0
+
+// Remember that ints are different than floats in F#. Don't write 3 if you meant to write 3.0
+AssertEquality squared __
+AssertEquality cubed __
+
+#!markdown
+
+Think about the `squareAndCube` function. Is there really more than one return value? What type does the `squareAndCube` function return?
+
+#!fsharp
+
+// The truth behind multiple return values
+
+let squareAndCube x =
+    (x ** 2.0, x ** 3.0)
+
+let result = squareAndCube 3.0
+
+AssertEquality result __
