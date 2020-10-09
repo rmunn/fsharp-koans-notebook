@@ -80,7 +80,6 @@ let expected_value = 1 + 1
 let actual_value = 2 //start by changing this line
 
 AssertEquality expected_value actual_value
- 
 
 #!fsharp
 
@@ -427,4 +426,137 @@ let squareAndCube x =
 
 let result = squareAndCube 3.0
 
+AssertEquality result __
+
+#!markdown
+
+## Exercise 7: About strings
+
+Most languages have a set of utilities for manipulating strings. F# is no different.
+
+#!markdown
+
+You assign string values with `let`, and concatenate with `+`.
+
+#!fsharp
+
+// String values
+let message = "hello"
+
+AssertEquality message __
+
+#!fsharp
+
+// Concatenation
+let message = "hello " + "world"
+
+AssertEquality message __
+
+#!markdown
+
+Formatting strings uses the `sprintf` function, which takes a format string using `%` markers, just like the C function of the same name. Printing to stdout is done with the `printf` function.
+
+Note that `printf` and `sprintf` are type-safe. Try changing the number in the example below to a string and see what happens.
+
+#!fsharp
+
+// %d for integers
+let message = sprintf "F# turns it to %d!" 11
+
+AssertEquality message __
+
+#!fsharp
+
+// %s marker for strings
+let message = sprintf "hello %s" "world"
+
+AssertEquality message __
+
+#!markdown
+
+In fact, sprintf can format any type with the `%A` marker. For all the format codes you can use with the printf function family, see ["Plain text formatting" at MSDN](https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/plaintext-formatting).
+
+#!fsharp
+
+// %A marker for generic formatting for any type
+let message = sprintf "Formatting other types is as easy as: %A" (1, 2, 3)
+
+AssertEquality message __
+
+#!markdown
+
+If you have a long string that you want to split over multiple lines of code, put a backslash at the end of the line. This causes all leading whitespace on the next line to be ignored.
+
+#!fsharp
+
+let message = "super\
+                cali\
+                fragilistic\
+                expiali\
+                docious"
+
+AssertEquality message __
+
+#!markdown
+
+If you do not use a backslash, the newlines and leading whitespace in each line become part of the string.
+
+#!fsharp
+
+let message = "This
+                is
+                on
+                five
+                lines"
+
+AssertEquality
+      message __
+
+#!markdown
+
+Individual characters can be extracted from a string using array-access notation. Note that in F#, array access looks like `arr.[idx]`, not `arr[idx]` like in C#. Also, the syntax for a single character is `'c'` with single quotes; `"c"` with double quotes is a string of length 1.
+
+#!fsharp
+
+let message = "hello world"
+
+let first = message.[0]
+let other = message.[4]
+
+(* A single character is denoted using single quotes, example: 'c',
+not double quotes as you would use for a string *)
+
+AssertEquality first __
+AssertEquality other __
+
+#!markdown
+
+It's time to apply what you've learned so far. Fill in the function below to make the asserts pass.
+
+#!fsharp
+
+let getFunFacts x =
+    __
+
+let funFactsAboutThree = getFunFacts 3
+let funFactsAboutSix = getFunFacts 6
+
+AssertEquality "3 doubled is 6, and 3 tripled is 9!" funFactsAboutThree
+AssertEquality "6 doubled is 12, and 6 tripled is 18!" funFactsAboutSix
+
+#!markdown
+
+## Exercise 8: About branching
+
+Branching is used to tell a program to conditionally perform an operation. It's another fundamental part of F#.
+
+#!fsharp
+
+let isEven x =
+    if x % 2 = 0 then
+        "it's even!"
+    else
+        "it's odd!"
+
+let result = isEven 2
 AssertEquality result __
