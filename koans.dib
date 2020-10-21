@@ -560,3 +560,247 @@ let isEven x =
 
 let result = isEven 2
 AssertEquality result __
+
+#!markdown
+
+In languages like C#, if statements do not yield results; they can only cause side effects. If statements in F# return values due to F#'s functional programming roots.
+
+#!fsharp
+
+let result =
+    if 2 = 3 then
+        "something is REALLY wrong"
+    else
+        "no problem here"
+
+AssertEquality result __
+
+#!markdown
+
+Another very common way to branch in F# is pattern matching, using the `match` keyword.
+
+#!fsharp
+
+let isApple x =
+    match x with
+    | "apple" -> true
+    | _ -> false
+
+let result1 = isApple "apple"
+let result2 = isApple ""
+
+AssertEquality result1 __
+AssertEquality result2 __
+
+#!markdown
+
+Using `if` expressions with tuples quickly becomes clumsy.
+
+#!fsharp
+
+let getDinner x =
+    let name, foodChoice = x
+
+    if foodChoice = "veggies" || foodChoice ="fish" ||
+        foodChoice = "chicken" then
+        sprintf "%s doesn't want red meat" name
+    else
+        sprintf "%s wants 'em some %s" name foodChoice
+
+let person1 = ("Chris", "steak")
+let person2 = ("Dave", "veggies")
+
+AssertEquality (getDinner person1) __
+AssertEquality (getDinner person2) __
+
+#!markdown
+
+Using `match` expressions with tuples usually produces more elegant code that's easier to read and maintain.
+
+#!fsharp
+
+let getDinner x =
+    match x with
+    | (name, "veggies")
+    | (name, "fish")
+    | (name, "chicken") -> sprintf "%s doesn't want red meat" name
+    | (name, foodChoice) -> sprintf "%s wants 'em some %s" name foodChoice
+
+let person1 = ("Bob", "fish")
+let person2 = ("Sally", "Burger")
+
+AssertEquality (getDinner person1) __
+AssertEquality (getDinner person2) __
+
+#!markdown
+
+## Exercise 9: About lists
+
+Lists are important building blocks that you'll use frequently in F# programming. They are used to group arbitrarily large sequences of values. It's very common to store values in a list and perform operations across each value in the list.
+
+#!markdown
+
+You can define a list by writing its contents inside square brackets, separated by **semicolons**, not commas. In F#, commas define tuples.
+
+#!fsharp
+
+let list = ["apple"; "pear"; "grape"; "peach"]
+
+// Note: The list data type in F# is a singly linked list, so indexing elements is O(n).
+
+AssertEquality list.Head __
+AssertEquality list.Tail __
+AssertEquality list.Length __
+
+#!markdown
+
+.NET developers coming from other languages may be surprised that F#'s list type is not the same as the base class library's `List<T>`. In other words, the assertion in the following code block is true.
+
+#!fsharp
+
+let list = ["apple"; "pear"; "grape"; "peach"]
+let dotNetList = new System.Collections.Generic.List<string>()
+// You don't need to modify the following line
+AssertInequality (list.GetType()) (dotNetList.GetType())
+
+#!markdown
+
+Developers new to F# often forget list contents are separated by semicolons, and use commas instead. This usually results in a list of length 1 containing a single tuple.
+
+#!fsharp
+
+let list = ["apple", "pear", "grape", "peach"]
+AssertEquality list.Length __
+
+let tuple = ("a","b","c","d")
+let head = list.Head
+AssertEquality (head.GetType()) (tuple.GetType())
+
+#!markdown
+
+You can create new lists using the `::` operator, sometimes referred to as `cons` (for "construct"), which adds a new element to the **head** of the list. This is an O(1) operation, as the new element's "next" pointer will point to the original list. This is known as "structural sharing", and you can take advantage of it to write very efficient operations using lists.
+
+#!fsharp
+
+let first = ["grape"; "peach"]
+let second = "pear" :: first
+let third = "apple" :: second
+
+AssertEquality third ["apple"; "pear"; "grape"; "peach"]
+//AssertEquality second __
+//AssertEquality first __
+
+#!markdown
+
+Because F# lists are immutable, structural sharing is safe. If it was possible to change the contents of `first` after it was created, that would change the contents of `second` and `third`, probably causing unintended effects (also known as bugs).
+
+#!fsharp
+
+let first = ["grape"; "peach"]
+let second = "pear" :: first
+let third = "apple" :: second
+
+// What happens if you uncomment the following?
+// first.Head <- "apple"
+// first.Tail <- ["peach"; "pear"]
+
+#!markdown
+
+You can concatenate two lists using the `@` operator. Unlike `::` which is O(1), the `@` operator is O(N) where N is the size of the first list (the list to the left of the `@` operator).
+
+Thought exercise. Why is `::` more efficient? Think about what `@` has to do in the code below to append `["peach"]` to `first` to create `second`. Remember that `first` is immutable: its contents cannot be changed, and in particular the last node in its linked list cannot have its "next" pointer modified, for the reasons we discussed above.
+
+#!fsharp
+
+let first = ["apple"; "pear"; "grape"]
+let second = first @ ["peach"]
+
+AssertEquality first __
+AssertEquality second __
+
+#!markdown
+
+Lists can also be created with the `..` operator (the "range" operator).
+
+#!fsharp
+
+let list = [0..4]
+
+AssertEquality list.Head __
+AssertEquality list.Tail __
+
+#!markdown
+
+F# also has list comprehensions, using intuitive syntax.
+
+#!fsharp
+
+let list = [ for i in 0..4 do yield i ]
+
+AssertEquality list __
+
+#!markdown
+
+List comprehensions can also contain conditions. In fact, just about any F# code can appear inside the `do` block of a list comprehension.
+
+#!fsharp
+
+let list = [ for i in 0..10 do
+                if i % 2 = 0 then yield i ]
+
+AssertEquality list __
+
+#!markdown
+
+Lists can be transformed using the `map` function from the `List` module.
+
+#!fsharp
+
+let square x =
+    x * x
+
+let original = [0..5]
+let result = List.map square original
+
+AssertEquality original __
+AssertEquality result __
+
+#!markdown
+
+There's also a `filter` function in the `List` module, which does what you'd expect.
+
+#!fsharp
+
+let isEven x =
+    x % 2 = 0
+
+let original = [0..5]
+let result = List.filter isEven original
+
+AssertEquality original __
+AssertEquality result __
+
+#!markdown
+
+There's also a `partition` function, which takes a predicate function and returns two lists. The first contains the items for which the predicate returned `true`, the second the items for which it returned `false`.
+
+#!fsharp
+
+let isOdd x =
+    x % 2 <> 0
+
+let original = [0..5]
+let result1, result2 = List.partition isOdd original
+
+AssertEquality result1 __
+AssertEquality result2 __
+
+#!markdown
+
+The `List` module contains many other useful functions. You can check them via Intellisense by typing `.` after `List`, or [online at the F# API reference](https://fsharp.github.io/fsharp-core-docs/reference/fsharp-collections-listmodule.html). If you're not sure which of the many functions is the one you need, [this guide to F#'s collection functions](https://fsharpforfunandprofit.com/posts/list-module-functions/) is very useful.
+
+#!markdown
+
+## Exercise 10: About pipelining
+
+Coming soon.
